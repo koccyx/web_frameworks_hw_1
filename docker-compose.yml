@@ -1,0 +1,60 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: resume-platform-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init-multiple-dbs.sql:/docker-entrypoint-initdb.d/init-multiple-dbs.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  users-service:
+    build:
+      context: ./users-service
+    container_name: users-service
+    env_file:
+      - ./users-service/.env
+    environment:
+      PORT: 3001
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/users_db?schema=public
+      JWT_SECRET: supersecret
+      NODE_ENV: production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "3001:3001"
+
+  core-service:
+    build:
+      context: ./core-service
+    container_name: core-service
+    env_file:
+      - ./core-service/.env
+    environment:
+      PORT: 3002
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/core_db?schema=public
+      JWT_SECRET: supersecret
+      NODE_ENV: production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      users-service:
+        condition: service_started
+    ports:
+      - "3002:3002"
+
+volumes:
+  postgres_data:
+
