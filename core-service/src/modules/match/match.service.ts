@@ -109,6 +109,7 @@ Rules:
 - score must be rounded to 2 decimals.
 - suggestions should explain how to adjust the resume to this vacancy.
 - resumeImprovements must be concrete rewrite actions (bullet-style short sentences).
+- All text values (suggestions, resumeImprovements, keywords) must be written in Russian language.
 - Do not include markdown or any text outside JSON.
 
 Resume:
