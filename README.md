@@ -1,9 +1,10 @@
 # Resume Platform Microservices
 
-Монорепозиторий с двумя backend-микросервисами на `Express.js + TypeScript + Prisma + PostgreSQL`:
+Монорепозиторий с frontend + двумя backend-микросервисами на `Express.js + TypeScript + Prisma + PostgreSQL`:
 
 - `users-service` — регистрация, логин, JWT авторизация, профиль пользователя
 - `core-service` — CRUD резюме, вакансий и сравнение `resume vs vacancy`
+- `frontend` — UI
 
 ## Структура проекта
 
@@ -53,6 +54,18 @@
 │   ├── Dockerfile
 │   ├── package.json
 │   └── tsconfig.json
+├── frontend
+│   ├── src
+│   ├── public
+│   ├── .env
+│   ├── Dockerfile
+│   ├── nginx.conf
+│   ├── index.html
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── tsconfig.app.json
+│   ├── tsconfig.node.json
+│   └── vite.config.ts
 ├── postgres
 │   └── init-multiple-dbs.sql
 ├── users-service
@@ -104,6 +117,7 @@
 ```bash
 cp users-service/.env.example users-service/.env
 cp core-service/.env.example core-service/.env
+cp frontend/.env.example frontend/.env
 ```
 
 2. Поднимите проект:
@@ -114,6 +128,7 @@ docker compose up --build
 
 3. Сервисы будут доступны по адресам:
 
+- `frontend` (nginx): `http://localhost:5173`
 - `users-service`: `http://localhost:3001`
 - `core-service`: `http://localhost:3002`
 - Swagger users-service: `http://localhost:3001/docs`
@@ -125,6 +140,7 @@ docker compose up --build
 
 - `POST /auth/register`
 - `POST /auth/login`
+- `POST /auth/refresh`
 - `GET /users/me`
 - `GET /health`
 
@@ -142,6 +158,11 @@ docker compose up --build
 - `DELETE /vacancies/:id`
 - `POST /match`
 - `GET /health`
+
+## Auth (JWT access + refresh)
+
+- `accessToken` используется в `Authorization: Bearer <token>` для запросов к `users-service` и `core-service`.
+- `refreshToken` хранится в `httpOnly` cookie и используется эндпоинтом `POST /auth/refresh` для обновления access токена.
 
 ## Prisma
 
