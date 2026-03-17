@@ -67,7 +67,7 @@ export function AuthView({
                     <select
                       className="form-select"
                       value={role}
-                      onChange={(e) => onRoleChange(e.target.value)}
+                      onChange={(e) => onRoleChange(e.target.value as User["role"])}
                       required
                     >
                       <option value="user">Пользователь</option>

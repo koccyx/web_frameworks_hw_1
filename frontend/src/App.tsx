@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { authApi, resumesApi, vacanciesApi, matchApi } from "./api";
+import { authApi, resumesApi, vacanciesApi, matchApi, tokenStorage } from "./api";
 import type { MatchResult, Resume, Vacancy, User } from "./types";
 import { AuthView } from "./components/AuthView";
 import { ResumesView } from "./components/ResumesView";
@@ -41,7 +41,7 @@ function App() {
   });
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = tokenStorage.getAccess();
     if (!token) return;
     authApi
       .me()
@@ -50,7 +50,7 @@ function App() {
         void loadData();
       })
       .catch(() => {
-        localStorage.removeItem("token");
+        tokenStorage.clear();
       });
   }, []);
 
@@ -59,10 +59,10 @@ function App() {
     setLoading(true);
     setError(null);
     try {
-      const { token, user: u } = isRegister
+      const { token, accessToken, refreshToken, user: u } = isRegister
         ? await authApi.register(email, password, role || "user")
         : await authApi.login(email, password);
-      localStorage.setItem("token", token);
+      tokenStorage.setTokens({ accessToken: accessToken ?? token, refreshToken });
       setUser(u);
       setEmail("");
       setPassword("");
@@ -76,7 +76,7 @@ function App() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
+    tokenStorage.clear();
     setUser(null);
     setResumes([]);
     setVacancies([]);
@@ -213,6 +213,8 @@ function App() {
 
   const isAuthenticated = Boolean(user);
 
+  const me = user!;
+
   return !isAuthenticated ? (
     <AuthView
       email={email}
@@ -236,7 +238,7 @@ function App() {
         </div>
         <div className="d-flex align-items-center gap-3">
           <span className="text-muted">
-            {user.email} ({user.role})
+            {me.email} ({me.role})
           </span>
           <button className="btn btn-outline-secondary btn-sm" type="button" onClick={handleLogout}>
             Выйти
