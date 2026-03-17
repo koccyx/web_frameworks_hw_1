@@ -8,10 +8,16 @@ import healthRoutes from "./modules/health/health.routes";
 import matchRoutes from "./modules/match/match.routes";
 import resumesRoutes from "./modules/resumes/resumes.routes";
 import vacanciesRoutes from "./modules/vacancies/vacancies.routes";
+import { env } from "./config/env";
 
 export const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: env.FRONTEND_ORIGIN,
+    credentials: true
+  })
+);
 app.use(morgan("dev"));
 app.use(express.json());
 

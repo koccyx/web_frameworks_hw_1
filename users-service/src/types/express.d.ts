@@ -5,6 +5,10 @@ declare global {
     interface Request {
       user?: JwtPayload;
     }
+
+    interface Cookies {
+      refreshToken?: string;
+    }
   }
 }
 

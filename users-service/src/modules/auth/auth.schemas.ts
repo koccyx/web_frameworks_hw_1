@@ -19,3 +19,13 @@ export const loginSchema = z.object({
   query: z.object({}).default({})
 });
 
+export const refreshSchema = z.object({
+  body: z
+    .object({
+      refreshToken: z.string().min(1).optional()
+    })
+    .default({}),
+  params: z.object({}).default({}),
+  query: z.object({}).default({})
+});
+

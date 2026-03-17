@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { asyncHandler } from "../../utils/async-handler";
 import { validate } from "../../middlewares/validate";
-import { login, register } from "./auth.controller";
-import { loginSchema, registerSchema } from "./auth.schemas";
+import { login, refresh, register } from "./auth.controller";
+import { loginSchema, refreshSchema, registerSchema } from "./auth.schemas";
 
 const router = Router();
 
@@ -62,6 +62,29 @@ router.post("/register", validate(registerSchema), asyncHandler(register));
  *         description: Login successful
  */
 router.post("/login", validate(loginSchema), asyncHandler(login));
+
+/**
+ * @openapi
+ * /auth/refresh:
+ *   post:
+ *     tags:
+ *       - Auth
+ *     summary: Refresh access token
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [refreshToken]
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Tokens refreshed
+ */
+router.post("/refresh", validate(refreshSchema), asyncHandler(refresh));
 
 export default router;
 
