@@ -15,7 +15,8 @@ export const app = express();
 app.use(
   cors({
     origin: env.FRONTEND_ORIGIN,
-    credentials: true
+    credentials: true,
+    exposedHeaders: ["x-access-token"]
   })
 );
 app.use(morgan("dev"));
@@ -28,4 +29,3 @@ app.use("/vacancies", vacanciesRoutes);
 app.use("/match", matchRoutes);
 
 app.use(errorHandler);
-

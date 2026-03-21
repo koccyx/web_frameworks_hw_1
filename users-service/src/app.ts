@@ -7,7 +7,6 @@ import { errorHandler } from "./middlewares/error-handler";
 import authRoutes from "./modules/auth/auth.routes";
 import healthRoutes from "./modules/health/health.routes";
 import usersRoutes from "./modules/users/users.routes";
-import cookieParser from "cookie-parser";
 import { env } from "./config/env";
 
 export const app = express();
@@ -20,12 +19,12 @@ app.use(
       if (!origin) return callback(null, true);
       return callback(null, origin === env.FRONTEND_ORIGIN);
     },
-    credentials: true
+    credentials: true,
+    exposedHeaders: ["x-access-token"]
   })
 );
 app.use(morgan("dev"));
 app.use(express.json());
-app.use(cookieParser());
 
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/health", healthRoutes);
@@ -33,4 +32,3 @@ app.use("/auth", authRoutes);
 app.use("/users", usersRoutes);
 
 app.use(errorHandler);
-
