@@ -32,7 +32,7 @@ const refreshCookieOptions = (req: Request) => ({
 });
 
 export const register = async (req: Request, res: Response) => {
-  const { email, password, role } = req.body;
+  const { email, password } = req.body;
 
   const existingUser = await prisma.user.findUnique({ where: { email } });
 
@@ -45,7 +45,7 @@ export const register = async (req: Request, res: Response) => {
     data: {
       email,
       passwordHash,
-      role
+      role: "user"
     }
   });
 

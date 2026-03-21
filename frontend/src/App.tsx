@@ -12,7 +12,6 @@ function App() {
   const [user, setUser] = useState<User | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<User["role"]>("user");
   const [isRegister, setIsRegister] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -60,7 +59,7 @@ function App() {
     setError(null);
     try {
       const { token, accessToken, refreshToken, user: u } = isRegister
-        ? await authApi.register(email, password, role || "user")
+        ? await authApi.register(email, password)
         : await authApi.login(email, password);
       tokenStorage.setTokens({ accessToken: accessToken ?? token, refreshToken });
       setUser(u);
@@ -78,6 +77,8 @@ function App() {
   const handleLogout = () => {
     tokenStorage.clear();
     setUser(null);
+    setEmail("");
+    setPassword("");
     setResumes([]);
     setVacancies([]);
     setMatchResult(null);
@@ -219,13 +220,11 @@ function App() {
     <AuthView
       email={email}
       password={password}
-      role={role}
       isRegister={isRegister}
       loading={loading}
       error={error}
       onEmailChange={setEmail}
       onPasswordChange={setPassword}
-      onRoleChange={(value) => setRole(value)}
       onToggleMode={() => setIsRegister((v) => !v)}
       onSubmit={handleAuth}
     />
@@ -280,6 +279,8 @@ function App() {
 
       {tab === "resumes" && (
         <ResumesView
+          currentUserId={me.id}
+          currentUserRole={me.role}
           resumes={resumes}
           resumeForm={resumeForm}
           onResumeFormChange={setResumeForm}
@@ -292,6 +293,8 @@ function App() {
 
       {tab === "vacancies" && (
         <VacanciesView
+          currentUserId={me.id}
+          currentUserRole={me.role}
           vacancies={vacancies}
           vacancyForm={vacancyForm}
           onVacancyFormChange={setVacancyForm}

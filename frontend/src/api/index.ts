@@ -112,8 +112,8 @@ export const authApi = {
     const { data } = await usersApi.post<AuthResponse>("/auth/login", { email, password });
     return data;
   },
-  async register(email: string, password: string, role?: User["role"]): Promise<AuthResponse> {
-    const { data } = await usersApi.post<AuthResponse>("/auth/register", { email, password, role });
+  async register(email: string, password: string): Promise<AuthResponse> {
+    const { data } = await usersApi.post<AuthResponse>("/auth/register", { email, password });
     return data;
   },
   async refresh(): Promise<{ accessToken: string; refreshToken: string; token: string }> {

@@ -1,15 +1,11 @@
-import type { User } from "../types";
-
 interface AuthViewProps {
   email: string;
   password: string;
-  role: User["role"];
   isRegister: boolean;
   loading: boolean;
   error: string | null;
   onEmailChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
-  onRoleChange: (value: User["role"]) => void;
   onToggleMode: () => void;
   onSubmit: (e: React.FormEvent) => void;
 }
@@ -17,13 +13,11 @@ interface AuthViewProps {
 export function AuthView({
   email,
   password,
-  role,
   isRegister,
   loading,
   error,
   onEmailChange,
   onPasswordChange,
-  onRoleChange,
   onToggleMode,
   onSubmit,
 }: AuthViewProps) {
@@ -40,9 +34,9 @@ export function AuthView({
               {error && <div className="alert alert-danger">{error}</div>}
               <form onSubmit={onSubmit} autoComplete="off">
                 <div className="mb-3">
-                  <label className="form-label">Email</label>
+                  <label className="form-label">Логин</label>
                   <input
-                    type="email"
+                    type="text"
                     className="form-control"
                     value={email}
                     onChange={(e) => onEmailChange(e.target.value)}
@@ -62,18 +56,7 @@ export function AuthView({
                   />
                 </div>
                 {isRegister && (
-                  <div className="mb-3">
-                    <label className="form-label">Роль</label>
-                    <select
-                      className="form-select"
-                      value={role}
-                      onChange={(e) => onRoleChange(e.target.value as User["role"])}
-                      required
-                    >
-                      <option value="user">Пользователь</option>
-                      <option value="admin">Администратор</option>
-                    </select>
-                  </div>
+                  <p className="text-muted small">Все новые аккаунты создаются с ролью user.</p>
                 )}
                 <button className="btn btn-primary w-100" type="submit" disabled={loading}>
                   {loading ? "Загрузка..." : isRegister ? "Зарегистрироваться" : "Войти"}
@@ -94,4 +77,3 @@ export function AuthView({
     </div>
   );
 }
-
