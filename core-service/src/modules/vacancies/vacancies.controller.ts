@@ -16,6 +16,24 @@ const getUserId = (req: Request): string => {
   return userId;
 };
 
+const isAdmin = (req: Request): boolean => req.user?.role === "admin";
+
+const ensureCanManageVacancy = async (req: Request, vacancyId: string) => {
+  const vacancy = await prisma.vacancy.findUnique({
+    where: { id: vacancyId }
+  });
+
+  if (!vacancy) {
+    throw new AppError("Vacancy not found", StatusCodes.NOT_FOUND);
+  }
+
+  if (!isAdmin(req) && vacancy.userId !== getUserId(req)) {
+    throw new AppError("Forbidden", StatusCodes.FORBIDDEN);
+  }
+
+  return vacancy;
+};
+
 export const createVacancy = async (req: Request, res: Response) => {
   const userId = getUserId(req);
 
@@ -32,10 +50,9 @@ export const createVacancy = async (req: Request, res: Response) => {
 };
 
 export const listVacancies = async (req: Request, res: Response) => {
-  const userId = getUserId(req);
+  getUserId(req);
 
   const vacancies = await prisma.vacancy.findMany({
-    where: { userId },
     orderBy: { createdAt: "desc" }
   });
 
@@ -44,12 +61,11 @@ export const listVacancies = async (req: Request, res: Response) => {
 
 export const getVacancyById = async (req: Request, res: Response) => {
   const vacancyId = getIdParam(req);
-  const userId = getUserId(req);
+  getUserId(req);
 
-  const vacancy = await prisma.vacancy.findFirst({
+  const vacancy = await prisma.vacancy.findUnique({
     where: {
-      id: vacancyId,
-      userId
+      id: vacancyId
     }
   });
 
@@ -62,18 +78,7 @@ export const getVacancyById = async (req: Request, res: Response) => {
 
 export const updateVacancy = async (req: Request, res: Response) => {
   const vacancyId = getIdParam(req);
-  const userId = getUserId(req);
-
-  const existingVacancy = await prisma.vacancy.findFirst({
-    where: {
-      id: vacancyId,
-      userId
-    }
-  });
-
-  if (!existingVacancy) {
-    throw new AppError("Vacancy not found", StatusCodes.NOT_FOUND);
-  }
+  const existingVacancy = await ensureCanManageVacancy(req, vacancyId);
 
   const vacancy = await prisma.vacancy.update({
     where: { id: existingVacancy.id },
@@ -85,18 +90,7 @@ export const updateVacancy = async (req: Request, res: Response) => {
 
 export const deleteVacancy = async (req: Request, res: Response) => {
   const vacancyId = getIdParam(req);
-  const userId = getUserId(req);
-
-  const existingVacancy = await prisma.vacancy.findFirst({
-    where: {
-      id: vacancyId,
-      userId
-    }
-  });
-
-  if (!existingVacancy) {
-    throw new AppError("Vacancy not found", StatusCodes.NOT_FOUND);
-  }
+  const existingVacancy = await ensureCanManageVacancy(req, vacancyId);
 
   await prisma.vacancy.delete({
     where: { id: existingVacancy.id }

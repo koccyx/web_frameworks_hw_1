@@ -7,6 +7,8 @@ interface ResumeFormState {
 }
 
 interface ResumesViewProps {
+  currentUserId: string;
+  currentUserRole: "user" | "admin";
   resumes: Resume[];
   resumeForm: ResumeFormState;
   onResumeFormChange: (value: ResumeFormState) => void;
@@ -17,6 +19,8 @@ interface ResumesViewProps {
 }
 
 export function ResumesView({
+  currentUserId,
+  currentUserRole,
   resumes,
   resumeForm,
   onResumeFormChange,
@@ -25,6 +29,9 @@ export function ResumesView({
   onDelete,
   onReload,
 }: ResumesViewProps) {
+  const canManageResume = (resume: Resume) =>
+    currentUserRole === "admin" || resume.userId === currentUserId;
+
   return (
     <div className="row">
       <div className="col-md-5 mb-3">
@@ -88,7 +95,7 @@ export function ResumesView({
         <div className="card h-100">
           <div className="card-body">
             <div className="d-flex justify-content-between align-items-center mb-3">
-              <h2 className="h5 mb-0">Мои резюме</h2>
+              <h2 className="h5 mb-0">Все резюме</h2>
               <button className="btn btn-sm btn-outline-secondary" type="button" onClick={onReload}>
                 Обновить
               </button>
@@ -111,22 +118,26 @@ export function ResumesView({
                         <td>{r.title}</td>
                         <td>{new Date(r.createdAt).toLocaleString()}</td>
                         <td className="text-end">
-                          <div className="btn-group-vertical" role="group" aria-label="Resume actions">
-                            <button
-                              className="btn btn-outline-primary btn-sm"
-                              type="button"
-                              onClick={() => onEdit(r)}
-                            >
-                              Редактировать
-                            </button>
-                            <button
-                              className="btn btn-outline-danger btn-sm"
-                              type="button"
-                              onClick={() => onDelete(r.id)}
-                            >
-                              Удалить
-                            </button>
-                          </div>
+                          {canManageResume(r) ? (
+                            <div className="btn-group-vertical" role="group" aria-label="Resume actions">
+                              <button
+                                className="btn btn-outline-primary btn-sm"
+                                type="button"
+                                onClick={() => onEdit(r)}
+                              >
+                                Редактировать
+                              </button>
+                              <button
+                                className="btn btn-outline-danger btn-sm"
+                                type="button"
+                                onClick={() => onDelete(r.id)}
+                              >
+                                Удалить
+                              </button>
+                            </div>
+                          ) : (
+                            <span className="text-muted small">Только просмотр</span>
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -140,4 +151,3 @@ export function ResumesView({
     </div>
   );
 }
-

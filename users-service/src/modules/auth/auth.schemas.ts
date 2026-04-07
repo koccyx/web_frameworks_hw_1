@@ -2,9 +2,8 @@ import { z } from "zod";
 
 export const registerSchema = z.object({
   body: z.object({
-    email: z.string().email(),
-    password: z.string().min(6),
-    role: z.string().min(1).default("user")
+    email: z.string().min(1),
+    password: z.string().min(1)
   }),
   params: z.object({}).default({}),
   query: z.object({}).default({})
@@ -12,8 +11,8 @@ export const registerSchema = z.object({
 
 export const loginSchema = z.object({
   body: z.object({
-    email: z.string().email(),
-    password: z.string().min(6)
+    email: z.string().min(1),
+    password: z.string().min(1)
   }),
   params: z.object({}).default({}),
   query: z.object({}).default({})
@@ -28,4 +27,3 @@ export const refreshSchema = z.object({
   params: z.object({}).default({}),
   query: z.object({}).default({})
 });
-

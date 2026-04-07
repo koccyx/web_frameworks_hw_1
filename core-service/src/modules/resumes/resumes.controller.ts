@@ -16,6 +16,24 @@ const getUserId = (req: Request): string => {
   return userId;
 };
 
+const isAdmin = (req: Request): boolean => req.user?.role === "admin";
+
+const ensureCanManageResume = async (req: Request, resumeId: string) => {
+  const resume = await prisma.resume.findUnique({
+    where: { id: resumeId }
+  });
+
+  if (!resume) {
+    throw new AppError("Resume not found", StatusCodes.NOT_FOUND);
+  }
+
+  if (!isAdmin(req) && resume.userId !== getUserId(req)) {
+    throw new AppError("Forbidden", StatusCodes.FORBIDDEN);
+  }
+
+  return resume;
+};
+
 export const createResume = async (req: Request, res: Response) => {
   const userId = getUserId(req);
 
@@ -31,10 +49,9 @@ export const createResume = async (req: Request, res: Response) => {
 };
 
 export const listResumes = async (req: Request, res: Response) => {
-  const userId = getUserId(req);
+  getUserId(req);
 
   const resumes = await prisma.resume.findMany({
-    where: { userId },
     orderBy: { createdAt: "desc" }
   });
 
@@ -43,12 +60,11 @@ export const listResumes = async (req: Request, res: Response) => {
 
 export const getResumeById = async (req: Request, res: Response) => {
   const resumeId = getIdParam(req);
-  const userId = getUserId(req);
+  getUserId(req);
 
-  const resume = await prisma.resume.findFirst({
+  const resume = await prisma.resume.findUnique({
     where: {
-      id: resumeId,
-      userId
+      id: resumeId
     }
   });
 
@@ -61,18 +77,7 @@ export const getResumeById = async (req: Request, res: Response) => {
 
 export const updateResume = async (req: Request, res: Response) => {
   const resumeId = getIdParam(req);
-  const userId = getUserId(req);
-
-  const existingResume = await prisma.resume.findFirst({
-    where: {
-      id: resumeId,
-      userId
-    }
-  });
-
-  if (!existingResume) {
-    throw new AppError("Resume not found", StatusCodes.NOT_FOUND);
-  }
+  const existingResume = await ensureCanManageResume(req, resumeId);
 
   const resume = await prisma.resume.update({
     where: { id: existingResume.id },
@@ -84,18 +89,7 @@ export const updateResume = async (req: Request, res: Response) => {
 
 export const deleteResume = async (req: Request, res: Response) => {
   const resumeId = getIdParam(req);
-  const userId = getUserId(req);
-
-  const existingResume = await prisma.resume.findFirst({
-    where: {
-      id: resumeId,
-      userId
-    }
-  });
-
-  if (!existingResume) {
-    throw new AppError("Resume not found", StatusCodes.NOT_FOUND);
-  }
+  const existingResume = await ensureCanManageResume(req, resumeId);
 
   await prisma.resume.delete({
     where: { id: existingResume.id }

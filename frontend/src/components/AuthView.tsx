@@ -1,9 +1,6 @@
-import type { User } from "../types";
-
 interface AuthViewProps {
   email: string;
   password: string;
-  role: User["role"];
   isRegister: boolean;
   loading: boolean;
   error: string | null;
@@ -21,7 +18,6 @@ interface AuthViewProps {
 export function AuthView({
   email,
   password,
-  // role,
   isRegister,
   loading,
   error,
@@ -31,7 +27,6 @@ export function AuthView({
   onPasswordChange,
   onCaptchaChange,
   onRefreshCaptcha,
-  // onRoleChange,
   onToggleMode,
   onSubmit,
 }: AuthViewProps) {
@@ -48,9 +43,9 @@ export function AuthView({
               {error && <div className="alert alert-danger">{error}</div>}
               <form onSubmit={onSubmit} autoComplete="off">
                 <div className="mb-3">
-                  <label className="form-label">Email</label>
+                  <label className="form-label">Логин</label>
                   <input
-                    type="email"
+                    type="text"
                     className="form-control"
                     value={email}
                     onChange={(e) => onEmailChange(e.target.value)}
@@ -94,7 +89,6 @@ export function AuthView({
                     required
                   />
                 </div>
-
                 <button className="btn btn-primary w-100" type="submit" disabled={loading}>
                   {loading ? "Загрузка..." : isRegister ? "Зарегистрироваться" : "Войти"}
                 </button>
@@ -114,4 +108,3 @@ export function AuthView({
     </div>
   );
 }
-

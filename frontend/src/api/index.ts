@@ -17,6 +17,7 @@ const authApiRaw = axios.create({
 });
 
 const ACCESS_TOKEN_KEY = "accessToken";
+const ACCESS_TOKEN_HEADER = "x-access-token";
 
 export const tokenStorage = {
   getAccess(): string | null {
@@ -61,7 +62,14 @@ async function refreshTokens(): Promise<{ accessToken: string; refreshToken?: st
 
 function withAutoRefresh(instance: typeof usersApi | typeof coreApi) {
   instance.interceptors.response.use(
-    (response) => response,
+    (response) => {
+      const rotatedAccessToken = response.headers?.[ACCESS_TOKEN_HEADER] as string | undefined;
+      if (rotatedAccessToken) {
+        tokenStorage.setTokens({ accessToken: rotatedAccessToken });
+      }
+
+      return response;
+    },
     async (error) => {
       const originalRequest = error?.config as
         | (typeof error.config & { _retry?: boolean })
@@ -104,8 +112,8 @@ export const authApi = {
     const { data } = await usersApi.post<AuthResponse>("/auth/login", { email, password });
     return data;
   },
-  async register(email: string, password: string, role?: User["role"]): Promise<AuthResponse> {
-    const { data } = await usersApi.post<AuthResponse>("/auth/register", { email, password, role });
+  async register(email: string, password: string): Promise<AuthResponse> {
+    const { data } = await usersApi.post<AuthResponse>("/auth/register", { email, password });
     return data;
   },
   async refresh(): Promise<{ accessToken: string; refreshToken: string; token: string }> {
@@ -166,4 +174,3 @@ export const matchApi = {
     return data;
   },
 };
-

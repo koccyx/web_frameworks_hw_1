@@ -12,6 +12,18 @@ import {
 
 const REFRESH_COOKIE_NAME = "refreshToken";
 
+const getCookieValue = (cookieHeader: string | undefined, name: string) => {
+  if (!cookieHeader) {
+    return undefined;
+  }
+
+  return cookieHeader
+    .split(";")
+    .map((part) => part.trim())
+    .find((part) => part.startsWith(`${name}=`))
+    ?.slice(name.length + 1);
+};
+
 const refreshCookieOptions = (req: Request) => ({
   httpOnly: true,
   sameSite: "lax" as const,
@@ -20,7 +32,7 @@ const refreshCookieOptions = (req: Request) => ({
 });
 
 export const register = async (req: Request, res: Response) => {
-  const { email, password, role } = req.body;
+  const { email, password } = req.body;
 
   const existingUser = await prisma.user.findUnique({ where: { email } });
 
@@ -33,7 +45,7 @@ export const register = async (req: Request, res: Response) => {
     data: {
       email,
       passwordHash,
-      role
+      role: "user"
     }
   });
 
@@ -110,7 +122,7 @@ export const login = async (req: Request, res: Response) => {
 
 export const refresh = async (req: Request, res: Response) => {
   const refreshToken =
-    (req.cookies?.[REFRESH_COOKIE_NAME] as string | undefined) ??
+    getCookieValue(req.headers.cookie, REFRESH_COOKIE_NAME) ??
     ((req.body as { refreshToken?: string } | undefined)?.refreshToken as string | undefined);
 
   if (!refreshToken) {
@@ -143,4 +155,3 @@ export const refresh = async (req: Request, res: Response) => {
     refreshToken: newRefreshToken
   });
 };
-

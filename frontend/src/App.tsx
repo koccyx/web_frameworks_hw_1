@@ -13,7 +13,6 @@ function App() {
   const [user, setUser] = useState<User | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<User["role"]>("user");
   const [isRegister, setIsRegister] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -113,7 +112,7 @@ function App() {
     setError(null);
     try {
       const { token, accessToken, refreshToken, user: u } = isRegister
-        ? await authApi.register(email, password, role || "user")
+        ? await authApi.register(email, password)
         : await authApi.login(email, password);
       tokenStorage.setTokens({ accessToken: accessToken ?? token, refreshToken });
       setUser(u);
@@ -134,6 +133,8 @@ function App() {
   const handleLogout = () => {
     tokenStorage.clear();
     setUser(null);
+    setEmail("");
+    setPassword("");
     setResumes([]);
     setVacancies([]);
     setMatchResult(null);
@@ -344,29 +345,34 @@ function App() {
             </li>
           </ul>
 
-          {tab === "resumes" && (
-            <ResumesView
-              resumes={resumes}
-              resumeForm={resumeForm}
-              onResumeFormChange={setResumeForm}
-              onSubmit={handleResumeSubmit}
-              onEdit={handleResumeEdit}
-              onDelete={handleResumeDelete}
-              onReload={loadData}
-            />
-          )}
 
-          {tab === "vacancies" && (
-            <VacanciesView
-              vacancies={vacancies}
-              vacancyForm={vacancyForm}
-              onVacancyFormChange={setVacancyForm}
-              onSubmit={handleVacancySubmit}
-              onEdit={handleVacancyEdit}
-              onDelete={handleVacancyDelete}
-              onReload={loadData}
-            />
-          )}
+      {tab === "resumes" && (
+        <ResumesView
+          currentUserId={me.id}
+          currentUserRole={me.role}
+          resumes={resumes}
+          resumeForm={resumeForm}
+          onResumeFormChange={setResumeForm}
+          onSubmit={handleResumeSubmit}
+          onEdit={handleResumeEdit}
+          onDelete={handleResumeDelete}
+          onReload={loadData}
+        />
+      )}
+
+      {tab === "vacancies" && (
+        <VacanciesView
+          currentUserId={me.id}
+          currentUserRole={me.role}
+          vacancies={vacancies}
+          vacancyForm={vacancyForm}
+          onVacancyFormChange={setVacancyForm}
+          onSubmit={handleVacancySubmit}
+          onEdit={handleVacancyEdit}
+          onDelete={handleVacancyDelete}
+          onReload={loadData}
+        />
+      )}
 
           {tab === "match" && (
             <MatchView

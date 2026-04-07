@@ -51,11 +51,11 @@ router.post(
     }
 
     const [resume, vacancy] = await Promise.all([
-      prisma.resume.findFirst({
-        where: { id: resumeId, userId }
+      prisma.resume.findUnique({
+        where: { id: resumeId }
       }),
-      prisma.vacancy.findFirst({
-        where: { id: vacancyId, userId }
+      prisma.vacancy.findUnique({
+        where: { id: vacancyId }
       })
     ]);
 

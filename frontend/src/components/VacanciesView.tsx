@@ -8,6 +8,8 @@ interface VacancyFormState {
 }
 
 interface VacanciesViewProps {
+  currentUserId: string;
+  currentUserRole: "user" | "admin";
   vacancies: Vacancy[];
   vacancyForm: VacancyFormState;
   onVacancyFormChange: (value: VacancyFormState) => void;
@@ -18,6 +20,8 @@ interface VacanciesViewProps {
 }
 
 export function VacanciesView({
+  currentUserId,
+  currentUserRole,
   vacancies,
   vacancyForm,
   onVacancyFormChange,
@@ -26,6 +30,9 @@ export function VacanciesView({
   onDelete,
   onReload,
 }: VacanciesViewProps) {
+  const canManageVacancy = (vacancy: Vacancy) =>
+    currentUserRole === "admin" || vacancy.userId === currentUserId;
+
   return (
     <div className="row">
       <div className="col-md-5 mb-3">
@@ -106,7 +113,7 @@ export function VacanciesView({
         <div className="card h-100">
           <div className="card-body">
             <div className="d-flex justify-content-between align-items-center mb-3">
-              <h2 className="h5 mb-0">Мои вакансии</h2>
+              <h2 className="h5 mb-0">Все вакансии</h2>
               <button className="btn btn-sm btn-outline-secondary" type="button" onClick={onReload}>
                 Обновить
               </button>
@@ -131,22 +138,26 @@ export function VacanciesView({
                         <td>{v.company}</td>
                         <td>{new Date(v.createdAt).toLocaleString()}</td>
                         <td className="text-end">
-                          <div className="btn-group-vertical" role="group" aria-label="Vacancy actions">
-                            <button
-                              className="btn btn-outline-primary btn-sm"
-                              type="button"
-                              onClick={() => onEdit(v)}
-                            >
-                              Редактировать
-                            </button>
-                            <button
-                              className="btn btn-outline-danger btn-sm"
-                              type="button"
-                              onClick={() => onDelete(v.id)}
-                            >
-                              Удалить
-                            </button>
-                          </div>
+                          {canManageVacancy(v) ? (
+                            <div className="btn-group-vertical" role="group" aria-label="Vacancy actions">
+                              <button
+                                className="btn btn-outline-primary btn-sm"
+                                type="button"
+                                onClick={() => onEdit(v)}
+                              >
+                                Редактировать
+                              </button>
+                              <button
+                                className="btn btn-outline-danger btn-sm"
+                                type="button"
+                                onClick={() => onDelete(v.id)}
+                              >
+                                Удалить
+                              </button>
+                            </div>
+                          ) : (
+                            <span className="text-muted small">Только просмотр</span>
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -160,4 +171,3 @@ export function VacanciesView({
     </div>
   );
 }
-
