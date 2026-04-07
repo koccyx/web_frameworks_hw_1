@@ -7,6 +7,7 @@ import { VacanciesView } from "./components/VacanciesView";
 import { MatchView } from "./components/MatchView";
 
 type Tab = "resumes" | "vacancies" | "match";
+type ThemeMode = "dark" | "light";
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -16,6 +17,9 @@ function App() {
   const [isRegister, setIsRegister] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [captchaImage, setCaptchaImage] = useState("");
+  const [captchaExpected, setCaptchaExpected] = useState("");
+  const [captchaValue, setCaptchaValue] = useState("");
 
   const [tab, setTab] = useState<Tab>("resumes");
   const [resumes, setResumes] = useState<Resume[]>([]);
@@ -24,6 +28,10 @@ function App() {
   const [selectedVacancyId, setSelectedVacancyId] = useState<string>("");
   const [matchResult, setMatchResult] = useState<MatchResult | null>(null);
   const [matchLoading, setMatchLoading] = useState(false);
+  const [theme, setTheme] = useState<ThemeMode>(() => {
+    const stored = localStorage.getItem("themeMode");
+    return stored === "light" ? "light" : "dark";
+  });
 
   const [resumeForm, setResumeForm] = useState<{ id?: string; title: string; rawText: string }>({
     title: "",
@@ -54,8 +62,53 @@ function App() {
       });
   }, []);
 
+  useEffect(() => {
+    regenerateCaptcha();
+  }, [isRegister]);
+
+  useEffect(() => {
+    document.body.setAttribute("data-theme", theme);
+    localStorage.setItem("themeMode", theme);
+  }, [theme]);
+
+  const regenerateCaptcha = () => {
+    const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    const text = Array.from({ length: 5 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join("");
+    const noiseLines = Array.from({ length: 6 }, () => {
+      const x1 = Math.floor(Math.random() * 160);
+      const y1 = Math.floor(Math.random() * 60);
+      const x2 = Math.floor(Math.random() * 160);
+      const y2 = Math.floor(Math.random() * 60);
+      const color = `rgba(${80 + Math.floor(Math.random() * 120)}, ${80 + Math.floor(Math.random() * 120)}, ${
+        80 + Math.floor(Math.random() * 120)
+      }, 0.55)`;
+      return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="1.2" />`;
+    }).join("");
+
+    const chars = text
+      .split("")
+      .map((char, index) => {
+        const x = 16 + index * 28;
+        const y = 38 + Math.floor(Math.random() * 10) - 5;
+        const rotate = Math.floor(Math.random() * 30) - 15;
+        return `<text x="${x}" y="${y}" fill="#1f2937" font-size="30" font-family="monospace" font-weight="700" transform="rotate(${rotate} ${x} ${y})">${char}</text>`;
+      })
+      .join("");
+
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="160" height="60" viewBox="0 0 160 60"><rect width="160" height="60" fill="#f8fafc"/>${noiseLines}${chars}</svg>`;
+
+    setCaptchaImage(`data:image/svg+xml;base64,${btoa(svg)}`);
+    setCaptchaExpected(text);
+    setCaptchaValue("");
+  };
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (captchaValue.trim().toUpperCase() !== captchaExpected) {
+      setError("Неверно введена капча.");
+      regenerateCaptcha();
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -66,9 +119,12 @@ function App() {
       setUser(u);
       setEmail("");
       setPassword("");
+      setCaptchaValue("");
+      regenerateCaptcha();
       await loadData();
     } catch (err: unknown) {
       setError("Ошибка авторизации. Проверьте email/пароль.");
+      regenerateCaptcha();
       console.error(err);
     } finally {
       setLoading(false);
@@ -214,108 +270,120 @@ function App() {
   const isAuthenticated = Boolean(user);
 
   const me = user!;
+  const toggleTheme = () => setTheme((prev) => (prev === "dark" ? "light" : "dark"));
 
-  return !isAuthenticated ? (
-    <AuthView
-      email={email}
-      password={password}
-      role={role}
-      isRegister={isRegister}
-      loading={loading}
-      error={error}
-      onEmailChange={setEmail}
-      onPasswordChange={setPassword}
-      onRoleChange={(value) => setRole(value)}
-      onToggleMode={() => setIsRegister((v) => !v)}
-      onSubmit={handleAuth}
-    />
-  ) : (
-    <div className="container-fluid py-3">
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <div>
-          <h1 className="h4 mb-0">Вакансии от СТЕПАНА</h1>
-          <small className="text-muted">Панель управления</small>
+  return (
+    <>
+      <button className="btn btn-sm btn-outline-secondary theme-toggle-btn" type="button" onClick={toggleTheme}>
+        {theme === "dark" ? "Light mode" : "Dark mode"}
+      </button>
+      {!isAuthenticated ? (
+        <AuthView
+          email={email}
+          password={password}
+          role={role}
+          isRegister={isRegister}
+          loading={loading}
+          error={error}
+          captchaImage={captchaImage}
+          captchaValue={captchaValue}
+          onEmailChange={setEmail}
+          onPasswordChange={setPassword}
+          onCaptchaChange={setCaptchaValue}
+          onRefreshCaptcha={regenerateCaptcha}
+          onRoleChange={(value) => setRole(value)}
+          onToggleMode={() => setIsRegister((v) => !v)}
+          onSubmit={handleAuth}
+        />
+      ) : (
+        <div className="container-fluid py-3">
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <h1 className="h4 mb-0">Вакансии от СТЕПАНА</h1>
+              <small className="text-muted">Панель управления</small>
+            </div>
+            <div className="d-flex align-items-center gap-3">
+              <span className="text-muted">
+                {me.email} ({me.role})
+              </span>
+              <button className="btn btn-outline-secondary btn-sm" type="button" onClick={handleLogout}>
+                Выйти
+              </button>
+            </div>
+          </div>
+
+          {error && <div className="alert alert-danger">{error}</div>}
+
+          <ul className="nav nav-tabs mb-3">
+            <li className="nav-item">
+              <button
+                className={`nav-link ${tab === "resumes" ? "active" : ""}`}
+                type="button"
+                onClick={() => setTab("resumes")}
+              >
+                Резюме
+              </button>
+            </li>
+            <li className="nav-item">
+              <button
+                className={`nav-link ${tab === "vacancies" ? "active" : ""}`}
+                type="button"
+                onClick={() => setTab("vacancies")}
+              >
+                Вакансии
+              </button>
+            </li>
+            <li className="nav-item">
+              <button
+                className={`nav-link ${tab === "match" ? "active" : ""}`}
+                type="button"
+                onClick={() => setTab("match")}
+              >
+                Сопоставление
+              </button>
+            </li>
+          </ul>
+
+          {tab === "resumes" && (
+            <ResumesView
+              resumes={resumes}
+              resumeForm={resumeForm}
+              onResumeFormChange={setResumeForm}
+              onSubmit={handleResumeSubmit}
+              onEdit={handleResumeEdit}
+              onDelete={handleResumeDelete}
+              onReload={loadData}
+            />
+          )}
+
+          {tab === "vacancies" && (
+            <VacanciesView
+              vacancies={vacancies}
+              vacancyForm={vacancyForm}
+              onVacancyFormChange={setVacancyForm}
+              onSubmit={handleVacancySubmit}
+              onEdit={handleVacancyEdit}
+              onDelete={handleVacancyDelete}
+              onReload={loadData}
+            />
+          )}
+
+          {tab === "match" && (
+            <MatchView
+              resumes={resumes}
+              vacancies={vacancies}
+              selectedResumeId={selectedResumeId}
+              selectedVacancyId={selectedVacancyId}
+              matchResult={matchResult}
+              matchLoading={matchLoading}
+              onChangeResume={setSelectedResumeId}
+              onChangeVacancy={setSelectedVacancyId}
+              onMatch={handleMatch}
+            />
+          )}
         </div>
-        <div className="d-flex align-items-center gap-3">
-          <span className="text-muted">
-            {me.email} ({me.role})
-          </span>
-          <button className="btn btn-outline-secondary btn-sm" type="button" onClick={handleLogout}>
-            Выйти
-          </button>
-        </div>
-      </div>
-
-      {error && <div className="alert alert-danger">{error}</div>}
-
-      <ul className="nav nav-tabs mb-3">
-        <li className="nav-item">
-          <button
-            className={`nav-link ${tab === "resumes" ? "active" : ""}`}
-            type="button"
-            onClick={() => setTab("resumes")}
-          >
-            Резюме
-          </button>
-        </li>
-        <li className="nav-item">
-          <button
-            className={`nav-link ${tab === "vacancies" ? "active" : ""}`}
-            type="button"
-            onClick={() => setTab("vacancies")}
-          >
-            Вакансии
-          </button>
-        </li>
-        <li className="nav-item">
-          <button
-            className={`nav-link ${tab === "match" ? "active" : ""}`}
-            type="button"
-            onClick={() => setTab("match")}
-          >
-            Сопоставление
-          </button>
-        </li>
-      </ul>
-
-      {tab === "resumes" && (
-        <ResumesView
-          resumes={resumes}
-          resumeForm={resumeForm}
-          onResumeFormChange={setResumeForm}
-          onSubmit={handleResumeSubmit}
-          onEdit={handleResumeEdit}
-          onDelete={handleResumeDelete}
-          onReload={loadData}
-        />
       )}
-
-      {tab === "vacancies" && (
-        <VacanciesView
-          vacancies={vacancies}
-          vacancyForm={vacancyForm}
-          onVacancyFormChange={setVacancyForm}
-          onSubmit={handleVacancySubmit}
-          onEdit={handleVacancyEdit}
-          onDelete={handleVacancyDelete}
-          onReload={loadData}
-        />
-      )}
-
-      {tab === "match" && (
-        <MatchView
-          resumes={resumes}
-          vacancies={vacancies}
-          selectedResumeId={selectedResumeId}
-          selectedVacancyId={selectedVacancyId}
-          matchResult={matchResult}
-          matchLoading={matchLoading}
-          onChangeResume={setSelectedResumeId}
-          onChangeVacancy={setSelectedVacancyId}
-          onMatch={handleMatch}
-        />
-      )}
-    </div>
+    </>
   );
 }
 

@@ -7,8 +7,12 @@ interface AuthViewProps {
   isRegister: boolean;
   loading: boolean;
   error: string | null;
+  captchaImage: string;
+  captchaValue: string;
   onEmailChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
+  onCaptchaChange: (value: string) => void;
+  onRefreshCaptcha: () => void;
   onRoleChange: (value: User["role"]) => void;
   onToggleMode: () => void;
   onSubmit: (e: React.FormEvent) => void;
@@ -17,13 +21,17 @@ interface AuthViewProps {
 export function AuthView({
   email,
   password,
-  role,
+  // role,
   isRegister,
   loading,
   error,
+  captchaImage,
+  captchaValue,
   onEmailChange,
   onPasswordChange,
-  onRoleChange,
+  onCaptchaChange,
+  onRefreshCaptcha,
+  // onRoleChange,
   onToggleMode,
   onSubmit,
 }: AuthViewProps) {
@@ -61,20 +69,32 @@ export function AuthView({
                     required
                   />
                 </div>
-                {isRegister && (
-                  <div className="mb-3">
-                    <label className="form-label">Роль</label>
-                    <select
-                      className="form-select"
-                      value={role}
-                      onChange={(e) => onRoleChange(e.target.value as User["role"])}
-                      required
-                    >
-                      <option value="user">Пользователь</option>
-                      <option value="admin">Администратор</option>
-                    </select>
+
+                <div className="mb-3">
+                  <label className="form-label d-flex justify-content-between align-items-center">
+                    <span>Введите символы с картинки</span>
+                    <button className="btn btn-sm btn-outline-secondary" type="button" onClick={onRefreshCaptcha}>
+                      Обновить
+                    </button>
+                  </label>
+                  <div className="border rounded bg-light p-2 d-flex justify-content-center mb-2">
+                    {captchaImage ? (
+                      <img src={captchaImage} alt="Капча" width={160} height={60} />
+                    ) : (
+                      <span className="text-muted">Загрузка капчи...</span>
+                    )}
                   </div>
-                )}
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={captchaValue}
+                    onChange={(e) => onCaptchaChange(e.target.value)}
+                    placeholder="Введите код"
+                    autoComplete="off"
+                    required
+                  />
+                </div>
+
                 <button className="btn btn-primary w-100" type="submit" disabled={loading}>
                   {loading ? "Загрузка..." : isRegister ? "Зарегистрироваться" : "Войти"}
                 </button>
