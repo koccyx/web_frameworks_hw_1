@@ -278,6 +278,10 @@ body[data-theme="light"] .table thead th {
   vertical-align: middle;
 }
 
+.table tbody td {
+  color: var(--text-main) !important;
+}
+
 .alert-danger {
   color: #ffd7de;
   background: rgba(245, 93, 123, 0.2);
@@ -316,9 +320,101 @@ body[data-theme="light"] .alert-danger {
   color: #f3f7ff;
 }
 
+.card p,
+.card li {
+  color: var(--text-main);
+}
+
 body[data-theme="light"] .card h2,
 body[data-theme="light"] .card h3,
 body[data-theme="light"] .card .h5,
 body[data-theme="light"] .card .h6 {
+  color: #1c315b;
+}
+
+.profile-hero {
+  background: linear-gradient(120deg, rgba(62, 124, 255, 0.22), rgba(57, 195, 255, 0.18));
+}
+
+.stat-card {
+  border-color: rgba(130, 170, 255, 0.35);
+}
+
+.stat-label {
+  font-size: 0.86rem;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 0.45rem;
+}
+
+.stat-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-main);
+  word-break: break-word;
+}
+
+.preview-modal .modal-dialog {
+  max-width: 980px;
+}
+
+.preview-modal-content {
+  background: linear-gradient(180deg, rgba(16, 25, 46, 0.98), rgba(13, 21, 39, 0.98));
+  border: 1px solid rgba(129, 167, 255, 0.28);
+  border-radius: 18px;
+  box-shadow: 0 24px 60px rgba(2, 8, 23, 0.65);
+}
+
+.preview-modal-header,
+.preview-modal-footer {
+  border-color: rgba(129, 167, 255, 0.2);
+}
+
+.preview-modal-header .modal-title {
+  color: #f3f7ff;
+}
+
+.preview-modal-header .btn-close {
+  filter: invert(1) opacity(0.8);
+}
+
+.preview-meta {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.preview-modal-body {
+  max-height: 70vh;
+}
+
+.preview-text {
+  color: var(--text-main);
+  white-space: pre-wrap;
+  background: rgba(8, 13, 27, 0.62);
+  border: 1px solid rgba(171, 190, 238, 0.2);
+  border-radius: 12px;
+  padding: 1rem;
+  font-family: "JetBrains Mono", Consolas, "Courier New", monospace;
+  line-height: 1.45;
+}
+
+body[data-theme="light"] .preview-modal-content {
+  background: linear-gradient(180deg, rgba(252, 254, 255, 0.98), rgba(245, 250, 255, 0.98));
+  border-color: rgba(79, 116, 197, 0.32);
+  box-shadow: 0 20px 45px rgba(32, 59, 113, 0.18);
+}
+
+body[data-theme="light"] .preview-modal-header .btn-close {
+  filter: none;
+}
+
+body[data-theme="light"] .preview-modal-header .modal-title {
+  color: #1c315b;
+}
+
+body[data-theme="light"] .preview-text {
+  background: rgba(240, 246, 255, 0.92);
+  border-color: rgba(94, 126, 199, 0.35);
   color: #1c315b;
 }

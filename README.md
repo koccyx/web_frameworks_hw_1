@@ -128,7 +128,8 @@ docker compose up --build
 
 3. Сервисы будут доступны по адресам:
 
-- `frontend` (nginx): `http://localhost:5173`
+- `frontend-mobx` (nginx): `http://localhost:5173`
+- `frontend-rtk` (nginx): `http://localhost:5174`
 - `users-service`: `http://localhost:3001`
 - `core-service`: `http://localhost:3002`
 - Swagger users-service: `http://localhost:3001/docs`

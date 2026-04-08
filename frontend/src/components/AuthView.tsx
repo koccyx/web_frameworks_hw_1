@@ -1,4 +1,5 @@
 interface AuthViewProps {
+  appLabel: string;
   email: string;
   password: string;
   isRegister: boolean;
@@ -10,12 +11,12 @@ interface AuthViewProps {
   onPasswordChange: (value: string) => void;
   onCaptchaChange: (value: string) => void;
   onRefreshCaptcha: () => void;
-  onRoleChange: (value: User["role"]) => void;
   onToggleMode: () => void;
   onSubmit: (e: React.FormEvent) => void;
 }
 
 export function AuthView({
+  appLabel,
   email,
   password,
   isRegister,
@@ -36,7 +37,7 @@ export function AuthView({
         <div className="col-md-6">
           <div className="card shadow-sm">
             <div className="card-body">
-              <h1 className="h4 mb-3 text-center">Вакансии от СТЕПАНА</h1>
+              <h1 className="h4 mb-3 text-center">{appLabel}</h1>
               <p className="text-muted text-center mb-4">
                 Войдите или зарегистрируйтесь, чтобы управлять резюме и вакансиями.
               </p>

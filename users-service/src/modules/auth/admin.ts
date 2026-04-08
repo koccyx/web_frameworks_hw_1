@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import { prisma } from "../../lib/prisma";
 
-const ADMIN_EMAIL = "admin";
+const ADMIN_EMAIL = "admin@mail.ru";
 const ADMIN_PASSWORD = "admin";
 const ADMIN_ROLE = "admin";
 

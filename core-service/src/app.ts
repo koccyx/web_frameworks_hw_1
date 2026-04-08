@@ -11,10 +11,14 @@ import vacanciesRoutes from "./modules/vacancies/vacancies.routes";
 import { env } from "./config/env";
 
 export const app = express();
+const allowedOrigins = env.FRONTEND_ORIGIN.split(",").map((o) => o.trim()).filter(Boolean);
 
 app.use(
   cors({
-    origin: env.FRONTEND_ORIGIN,
+    origin(origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+      if (!origin) return callback(null, true);
+      return callback(null, allowedOrigins.includes(origin));
+    },
     credentials: true,
     exposedHeaders: ["x-access-token"]
   })

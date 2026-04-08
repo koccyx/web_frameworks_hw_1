@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { Vacancy } from "../types";
 
 interface VacancyFormState {
@@ -30,6 +31,7 @@ export function VacanciesView({
   onDelete,
   onReload,
 }: VacanciesViewProps) {
+  const [previewVacancy, setPreviewVacancy] = useState<Vacancy | null>(null);
   const canManageVacancy = (vacancy: Vacancy) =>
     currentUserRole === "admin" || vacancy.userId === currentUserId;
 
@@ -138,7 +140,15 @@ export function VacanciesView({
                         <td>{v.company}</td>
                         <td>{new Date(v.createdAt).toLocaleString()}</td>
                         <td className="text-end">
-                          {canManageVacancy(v) ? (
+                          <div className="d-flex justify-content-end gap-2 flex-wrap">
+                            <button
+                              className="btn btn-outline-secondary btn-sm"
+                              type="button"
+                              onClick={() => setPreviewVacancy(v)}
+                            >
+                              Просмотр
+                            </button>
+                            {canManageVacancy(v) ? (
                             <div className="btn-group-vertical" role="group" aria-label="Vacancy actions">
                               <button
                                 className="btn btn-outline-primary btn-sm"
@@ -157,7 +167,8 @@ export function VacanciesView({
                             </div>
                           ) : (
                             <span className="text-muted small">Только просмотр</span>
-                          )}
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -168,6 +179,39 @@ export function VacanciesView({
           </div>
         </div>
       </div>
+
+      {previewVacancy && (
+        <div className="modal fade show d-block preview-modal" tabIndex={-1} role="dialog" aria-modal="true">
+          <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div className="modal-content preview-modal-content">
+              <div className="modal-header preview-modal-header">
+                <div>
+                  <h3 className="modal-title h5 mb-1">{previewVacancy.title}</h3>
+                  <div className="preview-meta">{previewVacancy.company}</div>
+                </div>
+                <button
+                  type="button"
+                  className="btn-close"
+                  aria-label="Close"
+                  onClick={() => setPreviewVacancy(null)}
+                />
+              </div>
+              <div className="modal-body preview-modal-body">
+                <div className="preview-meta mb-3">Создано: {new Date(previewVacancy.createdAt).toLocaleString()}</div>
+                <pre className="preview-text mb-0">
+                  {previewVacancy.rawText}
+                </pre>
+              </div>
+              <div className="modal-footer preview-modal-footer">
+                <button className="btn btn-outline-secondary" type="button" onClick={() => setPreviewVacancy(null)}>
+                  Закрыть
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {previewVacancy && <div className="modal-backdrop fade show" onClick={() => setPreviewVacancy(null)} />}
     </div>
   );
 }

@@ -10,6 +10,7 @@ import usersRoutes from "./modules/users/users.routes";
 import { env } from "./config/env";
 
 export const app = express();
+const allowedOrigins = env.FRONTEND_ORIGIN.split(",").map((o) => o.trim()).filter(Boolean);
 
 app.use(
   cors({
@@ -17,7 +18,7 @@ app.use(
       // For browser requests with credentials we must return a concrete origin (not "*").
       // Allow non-browser tools (no Origin header) as well.
       if (!origin) return callback(null, true);
-      return callback(null, origin === env.FRONTEND_ORIGIN);
+      return callback(null, allowedOrigins.includes(origin));
     },
     credentials: true,
     exposedHeaders: ["x-access-token"]

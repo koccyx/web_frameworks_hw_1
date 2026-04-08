@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { Resume } from "../types";
 
 interface ResumeFormState {
@@ -29,6 +30,7 @@ export function ResumesView({
   onDelete,
   onReload,
 }: ResumesViewProps) {
+  const [previewResume, setPreviewResume] = useState<Resume | null>(null);
   const canManageResume = (resume: Resume) =>
     currentUserRole === "admin" || resume.userId === currentUserId;
 
@@ -118,7 +120,15 @@ export function ResumesView({
                         <td>{r.title}</td>
                         <td>{new Date(r.createdAt).toLocaleString()}</td>
                         <td className="text-end">
-                          {canManageResume(r) ? (
+                          <div className="d-flex justify-content-end gap-2 flex-wrap">
+                            <button
+                              className="btn btn-outline-secondary btn-sm"
+                              type="button"
+                              onClick={() => setPreviewResume(r)}
+                            >
+                              Просмотр
+                            </button>
+                            {canManageResume(r) ? (
                             <div className="btn-group-vertical" role="group" aria-label="Resume actions">
                               <button
                                 className="btn btn-outline-primary btn-sm"
@@ -137,7 +147,8 @@ export function ResumesView({
                             </div>
                           ) : (
                             <span className="text-muted small">Только просмотр</span>
-                          )}
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -148,6 +159,39 @@ export function ResumesView({
           </div>
         </div>
       </div>
+
+      {previewResume && (
+        <div className="modal fade show d-block preview-modal" tabIndex={-1} role="dialog" aria-modal="true">
+          <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div className="modal-content preview-modal-content">
+              <div className="modal-header preview-modal-header">
+                <div>
+                  <h3 className="modal-title h5 mb-1">{previewResume.title}</h3>
+                  <div className="preview-meta">Резюме</div>
+                </div>
+                <button
+                  type="button"
+                  className="btn-close"
+                  aria-label="Close"
+                  onClick={() => setPreviewResume(null)}
+                />
+              </div>
+              <div className="modal-body preview-modal-body">
+                <div className="preview-meta mb-3">Создано: {new Date(previewResume.createdAt).toLocaleString()}</div>
+                <pre className="preview-text mb-0">
+                  {previewResume.rawText}
+                </pre>
+              </div>
+              <div className="modal-footer preview-modal-footer">
+                <button className="btn btn-outline-secondary" type="button" onClick={() => setPreviewResume(null)}>
+                  Закрыть
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {previewResume && <div className="modal-backdrop fade show" onClick={() => setPreviewResume(null)} />}
     </div>
   );
 }
