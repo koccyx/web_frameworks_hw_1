@@ -135,6 +135,34 @@ docker compose up --build
 - Swagger users-service: `http://localhost:3001/docs`
 - Swagger core-service: `http://localhost:3002/docs`
 
+## Frontend microfrontends (Webpack + Module Federation)
+
+Frontend переписан в формате microfrontend-монорепозитория:
+
+- `frontend/host` — host-приложение (авторизация, header/footer, переключение microfrontend, logout)
+- `frontend/mf-catalog` — remote-приложение (резюме + вакансии)
+- `frontend/mf-matching` — remote-приложение (профиль + сопоставление)
+- `frontend/shared` — общий проект для API, типов, капчи и token storage
+- `frontend/shared/src/rtk.ts` — единый state manager (`Redux Toolkit + RTK Query`) для всех данных backend
+- `frontend/webpack.shared.js` — переиспользуемая конфигурация webpack
+
+Все backend-данные (включая текущего пользователя) управляются через RTK Query.
+Кэширование запросов настроено на уровне query endpoints (`keepUnusedDataFor`, теги и авто-инвалидация).
+
+Локальный запуск frontend:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Порты:
+
+- `host`: `http://localhost:5173`
+- `mf-catalog`: `http://localhost:5174`
+- `mf-matching`: `http://localhost:5175`
+
 ## Основные endpoints
 
 ### users-service

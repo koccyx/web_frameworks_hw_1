@@ -1,36 +1,40 @@
 {
-  "name": "frontend",
+  "name": "frontend-mf-monorepo",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "version": "1.0.0",
+  "workspaces": [
+    "shared",
+    "host",
+    "mf-catalog",
+    "mf-matching"
+  ],
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "dev": "concurrently \"npm run dev -w host\" \"npm run dev -w mf-catalog\" \"npm run dev -w mf-matching\"",
+    "build": "npm run build -w host && npm run build -w mf-catalog && npm run build -w mf-matching",
+    "build:host": "npm run build -w host",
+    "build:catalog": "npm run build -w mf-catalog",
+    "build:matching": "npm run build -w mf-matching"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.9.2",
     "axios": "^1.13.6",
     "bootstrap": "^5.3.8",
-    "mobx": "^6.15.0",
-    "mobx-react-lite": "^4.1.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-redux": "^9.2.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.4",
     "@types/node": "^24.12.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.0",
-    "eslint": "^9.39.4",
-    "eslint-plugin-react-hooks": "^7.0.1",
-    "eslint-plugin-react-refresh": "^0.5.2",
-    "globals": "^17.4.0",
+    "concurrently": "^9.2.1",
+    "css-loader": "^7.1.2",
+    "html-webpack-plugin": "^5.6.4",
+    "style-loader": "^4.0.0",
+    "ts-loader": "^9.5.4",
     "typescript": "~5.9.3",
-    "typescript-eslint": "^8.56.1",
-    "vite": "^8.0.0"
+    "webpack": "^5.102.1",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.2"
   }
 }
