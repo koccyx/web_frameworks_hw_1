@@ -1,9 +1,11 @@
 version: "3.9"
 
+name: lab4
+
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: resume-platform-postgres
+    container_name: lab4-postgres
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -22,12 +24,12 @@ services:
   users-service:
     build:
       context: ./users-service
-    container_name: users-service
+    container_name: lab4-users-service
     env_file:
       - ./users-service/.env
     environment:
       PORT: 3001
-      FRONTEND_ORIGIN: http://localhost:5173,http://localhost:5174
+      FRONTEND_ORIGIN: http://localhost:5173,http://localhost:5174,http://localhost:5175
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/users_db?schema=public
       JWT_SECRET: supersecret
       NODE_ENV: production
@@ -40,12 +42,12 @@ services:
   core-service:
     build:
       context: ./core-service
-    container_name: core-service
+    container_name: lab4-core-service
     env_file:
       - ./core-service/.env
     environment:
       PORT: 3002
-      FRONTEND_ORIGIN: http://localhost:5173,http://localhost:5174
+      FRONTEND_ORIGIN: http://localhost:5173,http://localhost:5174,http://localhost:5175
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/core_db?schema=public
       JWT_SECRET: supersecret
       NODE_ENV: production
@@ -57,26 +59,14 @@ services:
     ports:
       - "3002:3002"
 
-  frontend-mobx:
+  mf-catalog:
     build:
       context: ./frontend
+      dockerfile: Dockerfile
+      target: mf-catalog
       args:
-        VITE_STATE_MANAGER: mobx
-    container_name: frontend-mobx
-    depends_on:
-      users-service:
-        condition: service_started
-      core-service:
-        condition: service_started
-    ports:
-      - "5173:80"
-
-  frontend-rtk:
-    build:
-      context: ./frontend
-      args:
-        VITE_STATE_MANAGER: rtk
-    container_name: frontend-rtk
+        MF_ASSET_BASE: http://localhost:5174/
+    container_name: lab4-mf-catalog
     depends_on:
       users-service:
         condition: service_started
@@ -85,6 +75,38 @@ services:
     ports:
       - "5174:80"
 
+  mf-matching:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: mf-matching
+      args:
+        MF_ASSET_BASE: http://localhost:5175/
+    container_name: lab4-mf-matching
+    depends_on:
+      users-service:
+        condition: service_started
+      core-service:
+        condition: service_started
+    ports:
+      - "5175:80"
+
+  mf-host:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: mf-host
+      args:
+        MF_CATALOG_REMOTE: http://localhost:5174/remoteEntry.js
+        MF_MATCHING_REMOTE: http://localhost:5175/remoteEntry.js
+    container_name: lab4-mf-host
+    depends_on:
+      mf-catalog:
+        condition: service_started
+      mf-matching:
+        condition: service_started
+    ports:
+      - "5173:80"
+
 volumes:
   postgres_data:
-

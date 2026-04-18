@@ -55,17 +55,16 @@
 │   ├── package.json
 │   └── tsconfig.json
 ├── frontend
+│   ├── host
+│   ├── mf-catalog
+│   ├── mf-matching
+│   ├── shared
 │   ├── src
-│   ├── public
-│   ├── .env
 │   ├── Dockerfile
-│   ├── nginx.conf
-│   ├── index.html
+│   ├── nginx.host.conf
+│   ├── nginx.remote.conf
 │   ├── package.json
-│   ├── tsconfig.json
-│   ├── tsconfig.app.json
-│   ├── tsconfig.node.json
-│   └── vite.config.ts
+│   └── webpack.shared.js
 ├── postgres
 │   └── init-multiple-dbs.sql
 ├── users-service
@@ -128,12 +127,15 @@ docker compose up --build
 
 3. Сервисы будут доступны по адресам:
 
-- `frontend-mobx` (nginx): `http://localhost:5173`
-- `frontend-rtk` (nginx): `http://localhost:5174`
+- `mf-host` (shell, Redux / RTK): `http://localhost:5173`
+- `mf-catalog` (remote): `http://localhost:5174`
+- `mf-matching` (remote): `http://localhost:5175`
 - `users-service`: `http://localhost:3001`
 - `core-service`: `http://localhost:3002`
 - Swagger users-service: `http://localhost:3001/docs`
 - Swagger core-service: `http://localhost:3002/docs`
+
+Основной UI открывайте на **5173** — remotes подгружаются с 5174 и 5175.
 
 ## Frontend microfrontends (Webpack + Module Federation)
 

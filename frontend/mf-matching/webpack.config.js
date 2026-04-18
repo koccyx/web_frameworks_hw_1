@@ -4,12 +4,16 @@ const { createBaseConfig } = require("../webpack.shared");
 
 module.exports = (_, argv) => {
   const mode = argv.mode || "development";
+  const isProd = mode === "production";
+  const publicPath =
+    process.env.MF_ASSET_BASE ?? (isProd ? "http://localhost:5175/" : "auto");
   const config = createBaseConfig({
     name: "mfMatching",
     port: 5175,
     mode,
     entry: path.resolve(__dirname, "src/index.ts"),
     outputPath: path.resolve(__dirname, "dist"),
+    publicPath,
     exposes: {
       "./App": path.resolve(__dirname, "src/MatchingApp.tsx"),
     },

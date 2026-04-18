@@ -8,6 +8,7 @@ function createBaseConfig(options) {
     mode,
     entry,
     outputPath,
+    publicPath,
     remotes = {},
     exposes = {},
     shared = {},
@@ -21,7 +22,7 @@ function createBaseConfig(options) {
     entry,
     output: {
       path: outputPath,
-      publicPath: "auto",
+      publicPath: publicPath !== undefined ? publicPath : "auto",
       clean: true,
     },
     resolve: {

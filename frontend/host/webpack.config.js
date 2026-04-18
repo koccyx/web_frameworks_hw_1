@@ -4,7 +4,10 @@ const { createBaseConfig } = require("../webpack.shared");
 
 module.exports = (_, argv) => {
   const mode = argv.mode || "development";
-  const isProd = mode === "production";
+  const catalogRemote =
+    process.env.MF_CATALOG_REMOTE || "http://localhost:5174/remoteEntry.js";
+  const matchingRemote =
+    process.env.MF_MATCHING_REMOTE || "http://localhost:5175/remoteEntry.js";
   const config = createBaseConfig({
     name: "host",
     port: 5173,
@@ -12,8 +15,8 @@ module.exports = (_, argv) => {
     entry: path.resolve(__dirname, "src/index.tsx"),
     outputPath: path.resolve(__dirname, "dist"),
     remotes: {
-      mfCatalog: isProd ? "mfCatalog@/mf-catalog/remoteEntry.js" : "mfCatalog@http://localhost:5174/remoteEntry.js",
-      mfMatching: isProd ? "mfMatching@/mf-matching/remoteEntry.js" : "mfMatching@http://localhost:5175/remoteEntry.js",
+      mfCatalog: `mfCatalog@${catalogRemote}`,
+      mfMatching: `mfMatching@${matchingRemote}`,
     },
   });
   config.plugins.push(

@@ -9,6 +9,7 @@ import {
   useMeQuery,
   useRegisterMutation,
 } from "@mf/shared";
+import { RemoteErrorBoundary } from "./RemoteErrorBoundary";
 
 type Section = "catalog" | "matching";
 
@@ -145,9 +146,17 @@ export function HostApp() {
 
       <main>
         {error && <div className="alert alert-danger">{error}</div>}
-        <Suspense fallback={<div className="card"><div className="card-body">Загрузка microfrontend...</div></div>}>
-          <CurrentRemote user={user} />
-        </Suspense>
+        <RemoteErrorBoundary key={section}>
+          <Suspense
+            fallback={
+              <div className="card">
+                <div className="card-body">Загрузка microfrontend...</div>
+              </div>
+            }
+          >
+            <CurrentRemote user={user} />
+          </Suspense>
+        </RemoteErrorBoundary>
       </main>
 
       <footer className="card mt-3">
